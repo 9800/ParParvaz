@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -24,8 +25,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ir.parvaz.calendar.adhan.AdhanScheduler
 import ir.parvaz.calendar.notification.DateNotificationHelper
 import ir.parvaz.calendar.ui.screens.home.HomeScreen
+import ir.parvaz.calendar.ui.screens.permissions.PermissionsScreen
 import ir.parvaz.calendar.ui.screens.settings.SettingsScreen
 import ir.parvaz.calendar.ui.theme.ParvazTheme
 
@@ -36,26 +39,30 @@ fun ParvazApp() {
     ParvazTheme {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             val context = LocalContext.current
-            var showSettings by remember { mutableStateOf(false) }
+            var screen by remember { mutableStateOf(0) }
 
             LaunchedEffect(Unit) {
                 DateNotificationHelper.refresh(context)
+                AdhanScheduler.scheduleAll(context)
             }
 
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = MaterialWhite()
+                color = Color(0xFFFBFDFC)
             ) {
-                if (showSettings) {
-                    SettingsScreen(onBack = { showSettings = false })
-                } else {
-                    Column(modifier = Modifier.fillMaxSize()) {
+                when (screen) {
+                    1 -> SettingsScreen(
+                        onBack = { screen = 0 },
+                        onOpenPermissions = { screen = 2 }
+                    )
+                    2 -> PermissionsScreen(onBack = { screen = 1 })
+                    else -> Column(modifier = Modifier.fillMaxSize()) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(BarBlue)
                                 .padding(horizontal = 8.dp),
-                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = "پر پرواز",
@@ -67,7 +74,7 @@ fun ParvazApp() {
                                     .padding(start = 8.dp)
                             )
 
-                            TextButton(onClick = { showSettings = true }) {
+                            TextButton(onClick = { screen = 1 }) {
                                 Text("تنظیمات", color = Color.White)
                             }
                         }
@@ -79,6 +86,3 @@ fun ParvazApp() {
         }
     }
 }
-
-@Composable
-private fun MaterialWhite(): Color = Color(0xFFFBFDFC)
