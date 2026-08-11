@@ -21,10 +21,14 @@ import ir.parvaz.calendar.adhan.AdhanScheduler
 import ir.parvaz.calendar.notification.DateNotificationHelper
 import ir.parvaz.calendar.ui.components.ParvazBottomNavBar
 import ir.parvaz.calendar.ui.components.ParvazNavigationDrawer
+import ir.parvaz.calendar.ui.screens.about.AboutScreen
 import ir.parvaz.calendar.ui.screens.calendar.CalendarScreen
+import ir.parvaz.calendar.ui.screens.events.EventsScreen
 import ir.parvaz.calendar.ui.screens.home.HomeScreen
 import ir.parvaz.calendar.ui.screens.permissions.PermissionsScreen
+import ir.parvaz.calendar.ui.screens.religious.ReligiousScreen
 import ir.parvaz.calendar.ui.screens.settings.SettingsScreen
+import ir.parvaz.calendar.ui.screens.weather.WeatherScreen
 import ir.parvaz.calendar.ui.theme.ParvazTheme
 import kotlinx.coroutines.launch
 
@@ -74,9 +78,13 @@ fun ParvazApp() {
                         2 -> HomeScreen(modifier = Modifier.padding(paddingValues))
                         3 -> SettingsScreen(
                             onBack = { screen = 0 },
-                            onOpenPermissions = { screen = 4 }
+                            onOpenPermissions = { screen = 8 }
                         )
-                        4 -> PermissionsScreen(onBack = { screen = 3 })
+                        4 -> AboutScreen(onBack = { screen = 0 })
+                        5 -> EventsScreen(onBack = { screen = 0 })
+                        6 -> ReligiousScreen(onBack = { screen = 0 })
+                        7 -> WeatherScreen(onBack = { screen = 0 })
+                        8 -> PermissionsScreen(onBack = { screen = 3 })
                     }
                 }
             }
