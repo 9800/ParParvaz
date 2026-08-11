@@ -1,6 +1,7 @@
 package ir.parvaz.calendar.ui.screens.permissions
 
 import android.app.AlarmManager
+import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -34,7 +35,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -54,9 +54,8 @@ fun PermissionsScreen(onBack: () -> Unit) {
     }
 
     val batteryOk = remember(tick) { isBatteryOk(context) }
-    val notifOk = remember(tick) { NotificationManagerCompat.areNotificationsEnabled(context) }
+    val notifOk = remember(tick) { isNotifOk(context) }
     val exactOk = remember(tick) { isExactOk(context) }
-    val fullOk = remember(tick) { isFullOk(context) }
     val overlayOk = remember(tick) { Settings.canDrawOverlays(context) }
 
     Column(
@@ -90,12 +89,6 @@ fun PermissionsScreen(onBack: () -> Unit) {
             desc = "برای پخش اذان دقیقاً سر وقت",
             granted = exactOk
         ) { requestExact(context) }
-
-        PermissionRow(
-            title = "اعلان تمام‌صفحه",
-            desc = "نمایش صفحه اذان وقتی گوشی قفل است",
-            granted = fullOk
-        ) { requestFull(context) }
 
         PermissionRow(
             title = "نمایش روی برنامه‌ها",
@@ -149,16 +142,15 @@ private fun isBatteryOk(context: Context): Boolean {
     return pm.isIgnoringBatteryOptimizations(context.packageName)
 }
 
+private fun isNotifOk(context: Context): Boolean {
+    val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    return nm.areNotificationsEnabled()
+}
+
 private fun isExactOk(context: Context): Boolean {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         am.canScheduleExactAlarms()
-    } else true
-}
-
-private fun isFullOk(context: Context): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        NotificationManagerCompat.canUseFullScreenIntent(context)
     } else true
 }
 
@@ -199,18 +191,6 @@ private fun requestExact(context: Context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         val intent = Intent(
             Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-            Uri.parse("package:${context.packageName}")
-        )
-        safeStart(context, intent)
-    } else {
-        openDetails(context)
-    }
-}
-
-private fun requestFull(context: Context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val intent = Intent(
-            Settings.ACTION_MANAGE_FULL_SCREEN_INTENT,
             Uri.parse("package:${context.packageName}")
         )
         safeStart(context, intent)
