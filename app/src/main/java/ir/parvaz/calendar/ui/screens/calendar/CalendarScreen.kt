@@ -1,6 +1,7 @@
 package ir.parvaz.calendar.ui.screens.calendar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,8 +37,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.parvaz.calendar.core.date.CalendarProvider
-import ir.parvaz.calendar.core.date.DateFormatter
 import ir.parvaz.calendar.core.date.PersianDate
+import ir.parvaz.calendar.core.events.EventsRepository
+import ir.parvaz.calendar.ui.screens.daydetail.DayDetailScreen
 
 private val BarBlue = Color(0xFF0E6BA8)
 private val HolidayPink = Color(0xFFF48A8A)
@@ -51,6 +53,17 @@ private fun fa(n: Int): String {
 fun CalendarScreen(onBack: () -> Unit) {
     var year by remember { mutableStateOf(CalendarProvider.today().persian.year) }
     var month by remember { mutableStateOf(CalendarProvider.today().persian.month) }
+    var selectedDay by remember { mutableStateOf<Int?>(null) }
+
+    if (selectedDay != null) {
+        DayDetailScreen(
+            year = year,
+            month = month,
+            day = selectedDay!!,
+            onBack = { selectedDay = null }
+        )
+        return
+    }
 
     val monthNames = listOf(
         "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
@@ -155,7 +168,14 @@ fun CalendarScreen(onBack: () -> Unit) {
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
-                                        .padding(vertical = 6.dp),
+                                        .padding(vertical = 6.dp)
+                                        .then(
+                                            if (day != null) {
+                                                Modifier.clickable { selectedDay = day }
+                                            } else {
+                                                Modifier
+                                            }
+                                        ),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     if (day != null) {
@@ -165,29 +185,40 @@ fun CalendarScreen(onBack: () -> Unit) {
 
                                         val g = CalendarProvider.jalaliToGregorian(year, month, day)
                                         val h = CalendarProvider.hijriOf(g)
-                                        val ev = ir.parvaz.calendar.core.events.EventsRepository.todayEvents(
+                                        val ev = EventsRepository.todayEvents(
                                             PersianDate(year, month, day), h, g
                                         )
                                         val isHoliday = ev.any { it.holiday }
+                                        val hasEvent = ev.isNotEmpty()
 
-                                        Box(
-                                            modifier = Modifier
-                                                .size(36.dp)
-                                                .clip(CircleShape)
-                                                .background(
-                                                    if (isToday) TodayCircle else Color.Transparent
-                                                ),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = fa(day),
-                                                color = when {
-                                                    isToday -> Color.White
-                                                    isHoliday -> HolidayPink
-                                                    else -> Color.Black
-                                                },
-                                                fontSize = 14.sp,
-                                                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(36.dp)
+                                                    .clip(CircleShape)
+                                                    .background(
+                                                        if (isToday) TodayCircle else Color.Transparent
+                                                    ),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = fa(day),
+                                                    color = when {
+                                                        isToday -> Color.White
+                                                        isHoliday -> HolidayPink
+                                                        else -> Color.Black
+                                                    },
+                                                    fontSize = 14.sp,
+                                                    fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            }
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(5.dp)
+                                                    .clip(CircleShape)
+                                                    .background(
+                                                        if (hasEvent) HolidayPink else Color.Transparent
+                                                    )
                                             )
                                         }
                                     }
