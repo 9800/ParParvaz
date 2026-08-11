@@ -22,6 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.parvaz.calendar.adhan.AdhanScheduler
 import ir.parvaz.calendar.data.AdhanPrefs
+import ir.parvaz.calendar.data.AppearancePrefs
 import ir.parvaz.calendar.data.NotificationPrefs
 import ir.parvaz.calendar.notification.DateNotificationHelper
 
@@ -64,6 +66,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val prefs = remember { NotificationPrefs(context) }
     val adhanPrefs = remember { AdhanPrefs(context) }
+    val appearancePrefs = remember { AppearancePrefs(context) }
 
     var enabled by remember { mutableStateOf(prefs.enabled) }
     var bg by remember { mutableStateOf(prefs.bgColor) }
@@ -76,6 +79,9 @@ fun SettingsScreen(
     var maghrib by remember { mutableStateOf(adhanPrefs.maghribEnabled) }
     var sound by remember { mutableStateOf(adhanPrefs.soundIndex) }
     var vib by remember { mutableStateOf(adhanPrefs.vibration) }
+
+    var fontSize by remember { mutableStateOf(appearancePrefs.fontSize) }
+    var notifStyle by remember { mutableStateOf(appearancePrefs.notifStyle) }
 
     fun applyNotif() {
         DateNotificationHelper.refresh(context)
@@ -185,6 +191,38 @@ fun SettingsScreen(
                     }
 
                     if (enabled) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text("مدل نمایش نوار اعلان", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        NotifStylePreview(
+                            style = 0,
+                            selected = notifStyle == 0,
+                            bg = bg,
+                            text = text,
+                            box = box,
+                            boxText = boxText
+                        ) {
+                            notifStyle = 0
+                            appearancePrefs.notifStyle = 0
+                            applyNotif()
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        NotifStylePreview(
+                            style = 1,
+                            selected = notifStyle == 1,
+                            bg = bg,
+                            text = text,
+                            box = box,
+                            boxText = boxText
+                        ) {
+                            notifStyle = 1
+                            appearancePrefs.notifStyle = 1
+                            applyNotif()
+                        }
+
                         ColorPicker("رنگ پس‌زمینه نوار", bg) {
                             bg = it; prefs.bgColor = it; applyNotif()
                         }
@@ -198,6 +236,30 @@ fun SettingsScreen(
                             boxText = it; prefs.boxTextColor = it; applyNotif()
                         }
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("ظاهر", color = BarBlue, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text("اندازه فونت: ${"٪${(fontSize * 100).toInt().let { faNum(it) }}"}", fontSize = 14.sp)
+                    Slider(
+                        value = fontSize,
+                        onValueChange = {
+                            fontSize = it
+                            appearancePrefs.fontSize = it
+                        },
+                        valueRange = 0.8f..1.4f,
+                        steps = 5
+                    )
                 }
             }
 
@@ -258,4 +320,58 @@ private fun ColorPicker(title: String, current: Int, onSelect: (Int) -> Unit) {
             )
         }
     }
+}
+
+@Composable
+private fun NotifStylePreview(
+    style: Int,
+    selected: Boolean,
+    bg: Int,
+    text: Int,
+    box: Int,
+    boxText: Int,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(CircleShape)
+            .background(Color(bg))
+            .then(
+                if (selected) {
+                    Modifier.border(3.dp, BarBlue, CircleShape)
+                } else {
+                    Modifier
+                }
+            )
+            .clickable(onClick = onClick)
+            .padding(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text("سه‌شنبه", color = Color(text), fontSize = 11.sp)
+                Text("۲۰ مرداد ۱۴۰۵", color = Color(text), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                if (style == 1) {
+                    Text("۱۱ اوت ۲۰۲۶ • ۲۶ صفر ۱۴۴۸", color = Color(text), fontSize = 10.sp)
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color(box)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("۲۰", color = Color(boxText), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+private fun faNum(n: Int): String {
+    return n.toString().map { c -> '۰' + (c - '0') }.joinToString("")
 }
