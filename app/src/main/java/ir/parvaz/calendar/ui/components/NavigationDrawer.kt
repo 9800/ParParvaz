@@ -2,22 +2,22 @@ package ir.parvaz.calendar.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -25,15 +25,12 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 
 private val DrawerBlue = Color(0xFF0E6BA8)
 
@@ -44,8 +41,6 @@ fun ParvazNavigationDrawer(
     onNavigate: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val scope = rememberCoroutineScope()
-
     ModalDrawerSheet(
         modifier = modifier
             .fillMaxHeight()
@@ -54,7 +49,6 @@ fun ParvazNavigationDrawer(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxHeight()
                 .background(DrawerBlue)
                 .padding(24.dp)
         ) {
@@ -85,6 +79,9 @@ fun ParvazNavigationDrawer(
             DrawerItem(Icons.Default.DateRange, "تقویم", 1, currentScreen, onNavigate)
             DrawerItem(Icons.Default.Favorite, "اوقات شرعی", 2, currentScreen, onNavigate)
             DrawerItem(Icons.Default.Settings, "تنظیمات", 3, currentScreen, onNavigate)
+            DrawerItem(Icons.Default.Star, "مناسبت‌ها", 5, currentScreen, onNavigate)
+            DrawerItem(Icons.Default.MenuBook, "زیارات و دعاها", 6, currentScreen, onNavigate)
+            DrawerItem(Icons.Default.Cloud, "آب‌وهوا", 7, currentScreen, onNavigate)
             DrawerItem(Icons.Default.Info, "درباره ما", 4, currentScreen, onNavigate)
         }
 
