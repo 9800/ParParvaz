@@ -5,7 +5,6 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -29,32 +28,28 @@ fun ParvazBottomNavBar(
             icon = { Icon(Icons.Default.Home, contentDescription = "خانه") },
             label = { Text("خانه", fontSize = 11.sp) },
             selected = currentScreen == 0,
-            onClick = { onNavigate(0) },
-            selectedIcon = { Icon(Icons.Default.Home, contentDescription = "خانه") }
+            onClick = { onNavigate(0) }
         )
 
         NavigationBarItem(
             icon = { Icon(Icons.Default.DateRange, contentDescription = "تقویم") },
             label = { Text("تقویم", fontSize = 11.sp) },
             selected = currentScreen == 1,
-            onClick = { onNavigate(1) },
-            selectedIcon = { Icon(Icons.Default.DateRange, contentDescription = "تقویم") }
+            onClick = { onNavigate(1) }
         )
 
         NavigationBarItem(
             icon = { Icon(Icons.Default.Favorite, contentDescription = "اوقات شرعی") },
             label = { Text("اوقات شرعی", fontSize = 11.sp) },
             selected = currentScreen == 2,
-            onClick = { onNavigate(2) },
-            selectedIcon = { Icon(Icons.Default.Favorite, contentDescription = "اوقات شرعی") }
+            onClick = { onNavigate(2) }
         )
 
         NavigationBarItem(
             icon = { Icon(Icons.Default.Settings, contentDescription = "تنظیمات") },
             label = { Text("تنظیمات", fontSize = 11.sp) },
             selected = currentScreen == 3,
-            onClick = { onNavigate(3) },
-            selectedIcon = { Icon(Icons.Default.Settings, contentDescription = "تنظیمات") }
+            onClick = { onNavigate(3) }
         )
     }
 }
