@@ -2,6 +2,7 @@ package ir.parvaz.calendar.ui.screens.home
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import ir.parvaz.calendar.adhan.AdhanScheduler
 import ir.parvaz.calendar.core.city.Cities
 import ir.parvaz.calendar.core.date.CalendarProvider
 import ir.parvaz.calendar.core.date.DateFormatter
@@ -27,6 +28,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         refresh()
+        AdhanScheduler.scheduleAll(app)
         if (store.savedCityId() == null) {
             _uiState.value = _uiState.value.copy(showCityPicker = true)
         }
@@ -36,6 +38,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         store.saveCityId(id)
         _uiState.value = _uiState.value.copy(showCityPicker = false)
         refresh()
+        AdhanScheduler.scheduleAll(getApplication())
     }
 
     fun openCityPicker() {
