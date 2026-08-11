@@ -13,10 +13,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -111,7 +115,7 @@ fun HomeScreen(
                     PrayerRow("اذان ظهر", times.dhuhr)
                     PrayerRow("غروب آفتاب", times.sunset)
                     PrayerRow("اذان مغرب", times.maghrib)
-                    PrayerRow("اذان عشا", times.isha)
+                    PrayerRow("نیمه‌شب شرعی", times.midnight)
                 }
             }
         }
@@ -128,29 +132,71 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = state.todayEvents,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (state.events.isEmpty()) {
+                    Text(
+                        text = "مناسبتی برای امروز ثبت نشده است.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    state.events.forEach { ev ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = ev.title,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            if (ev.holiday) {
+                                Text(
+                                    text = "تعطیل",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
     if (state.showCityPicker) {
+        var query by remember { mutableStateOf("") }
+        val filtered = if (query.isBlank()) {
+            Cities.all
+        } else {
+            Cities.all.filter { it.name.contains(query) }
+        }
+
         AlertDialog(
             onDismissRequest = {
                 if (state.cityName.isNotEmpty()) viewModel.closeCityPicker()
             },
             title = { Text("انتخاب شهر") },
             text = {
-                LazyColumn {
-                    items(Cities.all) { city ->
-                        TextButton(
-                            onClick = { viewModel.selectCity(city.id) },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(city.name)
+                Column {
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        label = { Text("جستجو") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    LazyColumn {
+                        items(filtered) { city ->
+                            TextButton(
+                                onClick = { viewModel.selectCity(city.id) },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(city.name)
+                            }
                         }
                     }
                 }
