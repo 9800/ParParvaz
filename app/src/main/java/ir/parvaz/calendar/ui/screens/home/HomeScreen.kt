@@ -1,6 +1,8 @@
 package ir.parvaz.calendar.ui.screens.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,8 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -21,14 +27,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ir.parvaz.calendar.R
 import ir.parvaz.calendar.core.city.Cities
+
+private val HeaderBlue = Color(0xFF0E6BA8)
+private val HolidayPink = Color(0xFFF48A8A)
+private val TodayCircle = Color(0xFFBBD6EE)
+private val White70 = Color(0xB3FFFFFF)
+
+private fun fa(n: Int): String {
+    return n.toString().map { c -> '۰' + (c - '0') }.joinToString("")
+}
 
 @Composable
 fun HomeScreen(
@@ -39,126 +59,206 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        Text(
-            text = state.weekday,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = state.persianDate,
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(HeaderBlue)
+                .padding(16.dp)
         ) {
-            Text(
-                text = state.gregorianDate,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Text(
-                text = "•",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Text(
-                text = state.hijriDate,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
                     Text(
-                        text = "اوقات شرعی ${state.cityName}",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                        text = state.weekday,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
                     )
-
-                    TextButton(onClick = { viewModel.openCityPicker() }) {
-                        Text("تغییر شهر")
-                    }
+                    Text(
+                        text = state.hijriDate,
+                        color = White70,
+                        fontSize = 13.sp
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                val times = state.prayerTimes
-                if (times == null) {
+                Box(
+                    modifier = Modifier
+                        .size(84.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x33FFFFFF)),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = "برای نمایش اوقات شرعی، شهر را انتخاب کنید.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = fa(state.todayDay),
+                        color = Color.White,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold
                     )
-                } else {
-                    PrayerRow("اذان صبح", times.fajr)
-                    PrayerRow("طلوع آفتاب", times.sunrise)
-                    PrayerRow("اذان ظهر", times.dhuhr)
-                    PrayerRow("غروب آفتاب", times.sunset)
-                    PrayerRow("اذان مغرب", times.maghrib)
-                    PrayerRow("نیمه‌شب شرعی", times.midnight)
+                }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = state.monthTitle,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Text(
+                        text = state.gregorianDate,
+                        color = White70,
+                        fontSize = 13.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                state.weekdayNames.forEach { name ->
+                    Text(
+                        text = name,
+                        modifier = Modifier.weight(1f),
+                        color = White70,
+                        fontSize = 11.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            val cells: List<DayCell?> = List(state.leadingBlanks) { null } + state.monthDays
+            cells.chunked(7).forEach { row ->
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    for (i in 0 until 7) {
+                        val cell = row.getOrNull(i)
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(vertical = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (cell != null) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(34.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                if (cell.isToday) TodayCircle else Color.Transparent
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = fa(cell.day),
+                                            color = when {
+                                                cell.isToday -> Color(0xFF123B5C)
+                                                cell.isHoliday -> HolidayPink
+                                                else -> Color.White
+                                            },
+                                            fontSize = 15.sp
+                                        )
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .size(5.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                if (cell.hasEvent) HolidayPink else Color.Transparent
+                                            )
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = stringResource(id = R.string.today_events_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                if (state.events.isEmpty()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "مناسبتی برای امروز ثبت نشده است.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = stringResource(id = R.string.today_events_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                } else {
-                    state.events.forEach { ev ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = ev.title,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            if (ev.holiday) {
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    if (state.events.isEmpty()) {
+                        Text(
+                            text = "مناسبتی برای امروز ثبت نشده است.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        state.events.forEach { ev ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
                                 Text(
-                                    text = "تعطیل",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.error
+                                    text = ev.title,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
+                                if (ev.holiday) {
+                                    Text(
+                                        text = "تعطیل",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
                             }
                         }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "اوقات شرعی ${state.cityName}",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        TextButton(onClick = { viewModel.openCityPicker() }) {
+                            Text("تغییر شهر")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val times = state.prayerTimes
+                    if (times == null) {
+                        Text(
+                            text = "برای نمایش اوقات شرعی، شهر را انتخاب کنید.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        PrayerRow("اذان صبح", times.fajr)
+                        PrayerRow("طلوع آفتاب", times.sunrise)
+                        PrayerRow("اذان ظهر", times.dhuhr)
+                        PrayerRow("عصر", times.asr)
+                        PrayerRow("غروب آفتاب", times.sunset)
+                        PrayerRow("اذان مغرب", times.maghrib)
+                        PrayerRow("نیمه‌شب شرعی", times.midnight)
                     }
                 }
             }
