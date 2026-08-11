@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import ir.parvaz.calendar.core.city.Cities
 import ir.parvaz.calendar.core.date.CalendarProvider
 import ir.parvaz.calendar.core.date.DateFormatter
+import ir.parvaz.calendar.core.events.EventsRepository
 import ir.parvaz.calendar.core.prayer.PrayerTimesCalculator
 import ir.parvaz.calendar.data.CityStore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +52,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             persianDate = DateFormatter.format(today.persian),
             gregorianDate = DateFormatter.format(today.gregorian),
             hijriDate = today.hijri?.let { DateFormatter.format(it) } ?: "—",
+            events = EventsRepository.todayEvents(today.persian, today.hijri, today.gregorian),
             cityName = city?.name ?: "",
             prayerTimes = times
         )
