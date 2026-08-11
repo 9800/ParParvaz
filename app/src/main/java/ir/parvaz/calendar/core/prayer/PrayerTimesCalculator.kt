@@ -5,12 +5,14 @@ import kotlin.math.acos
 import kotlin.math.asin
 import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 data class PrayerTimes(
     val fajr: String,
     val sunrise: String,
     val dhuhr: String,
+    val asr: String,
     val sunset: String,
     val maghrib: String,
     val midnight: String
@@ -29,12 +31,13 @@ object PrayerTimesCalculator {
         val midnight = fixHour((t.sunset + tomorrow.fajr + 24.0) / 2.0)
 
         return PrayerTimes(
-            fajr = format(t.fajr),
-            sunrise = format(t.sunrise),
-            dhuhr = format(t.dhuhr),
-            sunset = format(t.sunset),
-            maghrib = format(t.maghrib),
-            midnight = format(midnight)
+            fajr = format(t.fajr, round = true),
+            sunrise = format(t.sunrise, round = true),
+            dhuhr = format(t.dhuhr, round = false),
+            asr = format(t.asr, round = false),
+            sunset = format(t.sunset, round = false),
+            maghrib = format(t.maghrib, round = false),
+            midnight = format(midnight, round = false)
         )
     }
 
@@ -42,6 +45,7 @@ object PrayerTimesCalculator {
         val fajr: Double,
         val sunrise: Double,
         val dhuhr: Double,
+        val asr: Double,
         val sunset: Double,
         val maghrib: Double
     )
@@ -56,6 +60,7 @@ object PrayerTimesCalculator {
         val e = Math.toRadians(23.439 - 0.00000036 * d)
 
         val dec = asin(sin(e) * sin(l))
+        val decDeg = Math.toDegrees(dec)
         val ra = fixHour(Math.toDegrees(atan2(cos(e) * sin(l), cos(l))) / 15.0)
         val eqt = q / 15.0 - ra
 
@@ -66,10 +71,14 @@ object PrayerTimesCalculator {
         val tSun = angleTime(SUNRISE_ANGLE, latRad, dec)
         val tMaghrib = angleTime(MAGHRIB_ANGLE, latRad, dec)
 
+        val asrAlt = Math.atan(1.0 / (1.0 + Math.tan(Math.toRadians(Math.abs(lat - decDeg)))))
+        val tAsr = angleTime(-Math.toDegrees(asrAlt), latRad, dec)
+
         return Raw(
             fajr = dhuhr - tFajr,
             sunrise = dhuhr - tSun,
             dhuhr = dhuhr,
+            asr = dhuhr + tAsr,
             sunset = dhuhr + tSun,
             maghrib = dhuhr + tMaghrib
         )
@@ -108,10 +117,14 @@ object PrayerTimesCalculator {
         return r
     }
 
-    private fun format(hours: Double): String {
+    private fun format(hours: Double, round: Boolean): String {
         val h = fixHour(hours)
         var hh = h.toInt()
-        var mm = ((h - hh) * 60).toInt()
+        var mm = if (round) {
+            ((h - hh) * 60).roundToInt()
+        } else {
+            ((h - hh) * 60).toInt()
+        }
         if (mm == 60) {
             hh = (hh + 1) % 24
             mm = 0
