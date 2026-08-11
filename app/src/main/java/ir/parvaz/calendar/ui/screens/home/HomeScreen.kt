@@ -52,7 +52,7 @@ private val TodayCircle = Color(0xFFBBD6EE)
 private val White70 = Color(0xB3FFFFFF)
 
 private fun fa(n: Int): String {
-    return n.toString().map { c -> '۰' + (c - '0') }.joinToString("")
+    return n.toString().map { c -> '۰' + (c - '۰') }.joinToString("")
 }
 
 @Composable
@@ -157,12 +157,11 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val cells: List<HomeUiState.() -> Unit> = List(state.leadingBlanks) { null } + state.monthDays.map { it }
-            val dayCells: List<Any?> = List(state.leadingBlanks) { null } + state.monthDays
+            val dayCells: List<DayCell?> = List(state.leadingBlanks) { null } + state.monthDays
             dayCells.chunked(7).forEach { row ->
                 Row(modifier = Modifier.fillMaxWidth()) {
                     for (i in 0 until 7) {
-                        val cell = row.getOrNull(i) as? DayCell
+                        val cell = row.getOrNull(i)
                         Box(
                             modifier = Modifier
                                 .weight(1f)
