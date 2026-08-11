@@ -83,4 +83,12 @@ object EventsRepository {
 
         return list
     }
+
+    fun allEvents(): List<Event> {
+        val list = mutableListOf<Event>()
+        shamsi.forEach { list.add(Event(it.t, "شمسی", it.h)) }
+        qamari.forEach { list.add(Event(it.t, "قمری", it.h)) }
+        miladi.forEach { list.add(Event(it.t, "میلادی", it.h)) }
+        return list
+    }
 }
