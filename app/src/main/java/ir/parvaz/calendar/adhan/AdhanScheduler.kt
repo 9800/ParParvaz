@@ -87,7 +87,7 @@ object AdhanScheduler {
     private fun parseHours(fa: String): Double {
         val en = fa.map { c ->
             when (c) {
-                in '۰'..'' -> ('0' + (c - '۰'))
+                in '\u06F0'..'\u06F9' -> ('0' + (c.code - '\u06F0'.code))
                 else -> c
             }
         }.joinToString("")
