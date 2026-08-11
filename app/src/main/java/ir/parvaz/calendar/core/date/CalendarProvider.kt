@@ -2,19 +2,22 @@ package ir.parvaz.calendar.core.date
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.chrono.HijrahDate
+import java.util.Date
 
 object CalendarProvider {
 
     fun today(now: LocalDate = LocalDate.now()): DateInfo {
         return DateInfo(
-            persian = toPersian(now),
+            persian = persianOf(now),
             gregorian = now,
-            hijri = toHijri(now),
+            hijri = hijriOf(now),
             weekday = weekdayName(now.dayOfWeek)
         )
     }
 
-    private fun toPersian(date: LocalDate): PersianDate {
+    fun persianOf(date: LocalDate): PersianDate {
         val gy = date.year.toLong()
         val gm = date.monthValue
         val gd = date.dayOfMonth.toLong()
@@ -54,42 +57,69 @@ object CalendarProvider {
         return PersianDate(jy.toInt(), jm.toInt(), jd.toInt())
     }
 
-    private fun toHijri(date: LocalDate): HijriDate {
-        val jd = julianDayNumber(date)
-
-        var l = jd - 1948440L + 10632L
-        val n = (l - 1L) / 10631L
-        l = l - 10631L * n + 354L
-
-        val j = (10985L - l) / 5316L * ((50L * l) / 17719L) +
-            (l / 5670L) * ((43L * l) / 15238L)
-
-        l = l - (30L - j) / 15L * ((17719L * j) / 50L) -
-            (j / 16L) * ((15238L * j) / 43L) + 29L
-
-        val m = (24L * l) / 709L
-        val d = l - (709L * m) / 24L
-        val y = 30L * n + j - 30L
-
-        return HijriDate(y.toInt(), m.toInt(), d.toInt())
+    fun hijriOf(date: LocalDate): HijriDate? {
+        return try {
+            val hijrah = HijrahDate.from(date)
+            HijriDate(hijrah.year, hijrah.monthValue, hijrah.dayOfMonth)
+        } catch (exception: Exception) {
+            null
+        }
     }
 
-    private fun julianDayNumber(date: LocalDate): Long {
-        val y = date.year.toLong()
-        val m = date.monthValue.toLong()
-        val d = date.dayOfMonth.toLong()
+    fun jalaliToGregorian(jy: Int, jm: Int, jd: Int): LocalDate {
+        val jy2 = jy + 1595
+        var days = -355668L +
+            365L * jy2 +
+            (jy2 / 33) * 8L +
+            ((jy2 % 33 + 3) / 4) +
+            jd +
+            if (jm < 7) (jm - 1) * 31 else (jm - 7) * 30 + 186
 
-        val a = (14L - m) / 12L
-        val yy = y + 4800L - a
-        val mm = m + 12L * a - 3L
+        var gy = (400L * (days / 146097L)).toInt()
+        days %= 146097L
 
-        return d +
-            (153L * mm + 2L) / 5L +
-            365L * yy +
-            yy / 4L -
-            yy / 100L +
-            yy / 400L -
-            32045L
+        if (days > 36524L) {
+            days -= 1
+            gy += (100L * (days / 36524L)).toInt()
+            days %= 36524L
+            if (days >= 365L) days += 1
+        }
+
+        gy += (4L * (days / 1461L)).toInt()
+        days %= 1461L
+
+        if (days > 365L) {
+            gy += ((days - 1) / 365L).toInt()
+            days = (days - 1) % 365L
+        }
+
+        var gd = (days + 1).toInt()
+        val leap = (gy % 4 == 0 && gy % 100 != 0) || (gy % 400 == 0)
+        val sal = intArrayOf(0, 31, if (leap) 29 else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+        var gm = 0
+        while (gm < 13 && gd > sal[gm]) {
+            gd -= sal[gm]
+            gm++
+        }
+
+        return LocalDate.of(gy, gm, gd)
+    }
+
+    fun monthLength(jy: Int, jm: Int): Int {
+        return when {
+            jm <= 6 -> 31
+            jm <= 11 -> 30
+            else -> {
+                val g = jalaliToGregorian(jy, 12, 30)
+                val back = persianOf(g)
+                if (back.year == jy && back.month == 12 && back.day == 30) 30 else 29
+            }
+        }
+    }
+
+    fun firstDayOffset(jy: Int, jm: Int): Int {
+        val g = jalaliToGregorian(jy, jm, 1)
+        return (g.dayOfWeek.value + 1) % 7
     }
 
     private fun weekdayName(dayOfWeek: DayOfWeek): String {
