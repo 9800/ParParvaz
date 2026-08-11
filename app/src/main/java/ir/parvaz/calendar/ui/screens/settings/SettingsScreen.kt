@@ -16,6 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,6 +44,7 @@ import ir.parvaz.calendar.data.AdhanPrefs
 import ir.parvaz.calendar.data.NotificationPrefs
 import ir.parvaz.calendar.notification.DateNotificationHelper
 
+private val BarBlue = Color(0xFF0E6BA8)
 private val palette = listOf(
     Color(0xFF0E6BA8),
     Color(0xFF00BCD4),
@@ -78,99 +85,138 @@ fun SettingsScreen(
         AdhanScheduler.scheduleAll(context)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(BarBlue)
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(onClick = onBack) { Text("بازگشت") }
-            Spacer(modifier = Modifier.weight(1f))
-            Text("تنظیمات", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            IconButton(onClick = onBack) {
+                Icon(Icons.Default.ArrowForward, contentDescription = "بازگشت", tint = Color.White)
+            }
+            Text(
+                text = "تنظیمات",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Box(modifier = Modifier.size(48.dp))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("اذان", color = BarBlue, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
 
-        Text("اذان", color = Color(0xFF0E6BA8), fontWeight = FontWeight.Bold)
+                    SwitchRow("اذان صبح", fajr) {
+                        fajr = it; adhanPrefs.fajrEnabled = it; applyAdhan()
+                    }
+                    SwitchRow("اذان ظهر", dhuhr) {
+                        dhuhr = it; adhanPrefs.dhuhrEnabled = it; applyAdhan()
+                    }
+                    SwitchRow("اذان مغرب", maghrib) {
+                        maghrib = it; adhanPrefs.maghribEnabled = it; applyAdhan()
+                    }
 
-        SwitchRow("اذان صبح", fajr) {
-            fajr = it; adhanPrefs.fajrEnabled = it; applyAdhan()
-        }
-        SwitchRow("اذان ظهر", dhuhr) {
-            dhuhr = it; adhanPrefs.dhuhrEnabled = it; applyAdhan()
-        }
-        SwitchRow("اذان مغرب", maghrib) {
-            maghrib = it; adhanPrefs.maghribEnabled = it; applyAdhan()
-        }
+                    Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text("صدای اذان", fontSize = 14.sp)
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            for (i in 0..2) {
-                val label = "اذان ${i + 1}"
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(if (sound == i) Color(0xFF0E6BA8) else Color(0xFFE0E0E0))
-                        .clickable {
-                            sound = i
-                            adhanPrefs.soundIndex = i
+                    Text("صدای اذان", fontSize = 14.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        for (i in 0..2) {
+                            val label = "اذان ${i + 1}"
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(if (sound == i) BarBlue else Color(0xFFE0E0E0))
+                                    .clickable {
+                                        sound = i
+                                        adhanPrefs.soundIndex = i
+                                    }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    label,
+                                    color = if (sound == i) Color.White else Color.Black,
+                                    fontSize = 13.sp
+                                )
+                            }
                         }
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
+                    }
                     Text(
-                        label,
-                        color = if (sound == i) Color.White else Color.Black,
-                        fontSize = 13.sp
+                        "اگر فایل صوتی اذان داخل اپ قرار نگرفته باشد، صدای زنگ گوشی پخش می‌شود.",
+                        fontSize = 11.sp,
+                        color = Color.Gray
                     )
+
+                    SwitchRow("لرزش هنگام اذان", vib) {
+                        vib = it; adhanPrefs.vibration = it
+                    }
                 }
             }
-        }
-        Text(
-            "اگر فایل صوتی اذان داخل اپ قرار نگرفته باشد، صدای زنگ گوشی پخش می‌شود.",
-            fontSize = 11.sp,
-            color = Color.Gray
-        )
 
-        SwitchRow("لرزش هنگام اذان", vib) {
-            vib = it; adhanPrefs.vibration = it
-        }
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(20.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("نوار اعلان تاریخ", color = BarBlue, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
 
-        Text("نوار اعلان تاریخ", color = Color(0xFF0E6BA8), fontWeight = FontWeight.Bold)
+                    SwitchRow("نوار اعلان دائمی تاریخ", enabled) {
+                        enabled = it; prefs.enabled = it; applyNotif()
+                    }
 
-        SwitchRow("نوار اعلان دائمی تاریخ", enabled) {
-            enabled = it; prefs.enabled = it; applyNotif()
-        }
-
-        if (enabled) {
-            ColorPicker("رنگ پس‌زمینه نوار", bg) {
-                bg = it; prefs.bgColor = it; applyNotif()
+                    if (enabled) {
+                        ColorPicker("رنگ پس‌زمینه نوار", bg) {
+                            bg = it; prefs.bgColor = it; applyNotif()
+                        }
+                        ColorPicker("رنگ قلم تاریخ", text) {
+                            text = it; prefs.textColor = it; applyNotif()
+                        }
+                        ColorPicker("رنگ پس‌زمینه عدد", box) {
+                            box = it; prefs.boxColor = it; applyNotif()
+                        }
+                        ColorPicker("رنگ قلم عدد", boxText) {
+                            boxText = it; prefs.boxTextColor = it; applyNotif()
+                        }
+                    }
+                }
             }
-            ColorPicker("رنگ قلم تاریخ", text) {
-                text = it; prefs.textColor = it; applyNotif()
-            }
-            ColorPicker("رنگ پس‌زمینه عدد", box) {
-                box = it; prefs.boxColor = it; applyNotif()
-            }
-            ColorPicker("رنگ قلم عدد", boxText) {
-                boxText = it; prefs.boxTextColor = it; applyNotif()
-            }
-        }
 
-        Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Text("پایداری برنامه", color = Color(0xFF0E6BA8), fontWeight = FontWeight.Bold)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("پایداری برنامه", color = BarBlue, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
 
-        TextButton(onClick = onOpenPermissions) {
-            Text("مدیریت دسترسی‌ها (باتری، اعلان، آغاز خودکار)")
+                    TextButton(onClick = onOpenPermissions) {
+                        Text("مدیریت دسترسی‌ها")
+                    }
+                }
+            }
         }
     }
 }
@@ -180,11 +226,11 @@ private fun SwitchRow(title: String, checked: Boolean, onChange: (Boolean) -> Un
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(title, fontSize = 16.sp)
+        Text(title, fontSize = 15.sp)
         Switch(checked = checked, onCheckedChange = onChange)
     }
 }
