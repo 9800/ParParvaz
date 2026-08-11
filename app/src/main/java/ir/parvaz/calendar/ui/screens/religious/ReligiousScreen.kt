@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -110,6 +109,7 @@ fun ReligiousScreen(onBack: () -> Unit) {
                     }
                 }
             }
+
             selectedCategory != null -> {
                 val texts = ReligiousContent.byCategory(selectedCategory!!)
                 LazyColumn(modifier = Modifier.padding(16.dp)) {
@@ -135,3 +135,49 @@ fun ReligiousScreen(onBack: () -> Unit) {
                                     modifier = Modifier.weight(1f)
                                 )
                                 Icon(
+                                    Icons.Default.ArrowForward,
+                                    contentDescription = null,
+                                    tint = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            else -> {
+                LazyColumn(modifier = Modifier.padding(16.dp)) {
+                    items(ReligiousContent.categories) { category ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable { selectedCategory = category },
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = category,
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Icon(
+                                    Icons.Default.ArrowForward,
+                                    contentDescription = null,
+                                    tint = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
