@@ -2,9 +2,8 @@ package ir.parvaz.calendar.core.date
 
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.chrono.HijrahDate
-import java.util.Date
+import java.time.temporal.ChronoField
 
 object CalendarProvider {
 
@@ -60,7 +59,11 @@ object CalendarProvider {
     fun hijriOf(date: LocalDate): HijriDate? {
         return try {
             val hijrah = HijrahDate.from(date)
-            HijriDate(hijrah.year, hijrah.monthValue, hijrah.dayOfMonth)
+            HijriDate(
+                hijrah.get(ChronoField.YEAR),
+                hijrah.get(ChronoField.MONTH_OF_YEAR),
+                hijrah.get(ChronoField.DAY_OF_MONTH)
+            )
         } catch (exception: Exception) {
             null
         }
