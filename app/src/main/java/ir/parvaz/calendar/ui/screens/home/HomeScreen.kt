@@ -16,8 +16,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -52,12 +57,14 @@ private fun fa(n: Int): String {
 
 @Composable
 fun HomeScreen(
+    modifier: Modifier = Modifier,
+    onMenuClick: () -> Unit = {},
     viewModel: HomeViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
@@ -67,6 +74,24 @@ fun HomeScreen(
                 .background(HeaderBlue)
                 .padding(16.dp)
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onMenuClick) {
+                    Icon(Icons.Default.Menu, contentDescription = "منو", tint = Color.White)
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "پر پرواز",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Box(modifier = Modifier.size(48.dp))
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -132,11 +157,12 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val cells: List<DayCell?> = List(state.leadingBlanks) { null } + state.monthDays
-            cells.chunked(7).forEach { row ->
+            val cells: List<HomeUiState.() -> Unit> = List(state.leadingBlanks) { null } + state.monthDays.map { it }
+            val dayCells: List<Any?> = List(state.leadingBlanks) { null } + state.monthDays
+            dayCells.chunked(7).forEach { row ->
                 Row(modifier = Modifier.fillMaxWidth()) {
                     for (i in 0 until 7) {
-                        val cell = row.getOrNull(i)
+                        val cell = row.getOrNull(i) as? DayCell
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -181,7 +207,11 @@ fun HomeScreen(
         }
 
         Column(modifier = Modifier.padding(16.dp)) {
-            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = stringResource(id = R.string.today_events_title),
@@ -225,7 +255,11 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
