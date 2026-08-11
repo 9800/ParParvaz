@@ -9,7 +9,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,9 +19,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,6 +46,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+
+private val BarBlue = Color(0xFF0E6BA8)
 
 @Composable
 fun PermissionsScreen(onBack: () -> Unit) {
@@ -58,49 +68,112 @@ fun PermissionsScreen(onBack: () -> Unit) {
     val exactOk = remember(tick) { isExactOk(context) }
     val overlayOk = remember(tick) { Settings.canDrawOverlays(context) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) { Text("بازگشت") }
-            Spacer(modifier = Modifier.weight(1f))
-            Text("مدیریت دسترسی‌ها", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(BarBlue)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.Default.ArrowForward, contentDescription = "بازگشت", tint = Color.White)
+            }
+            Text(
+                text = "مدیریت دسترسی‌ها",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Box(modifier = Modifier.size(48.dp))
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    PermissionRow(
+                        title = "بهینه‌سازی باتری",
+                        desc = "برای پخش مطمئن اذان، بهینه‌سازی باتری را برای اپ غیرفعال کنید",
+                        granted = batteryOk
+                    ) { requestBattery(context) }
+                }
+            }
 
-        PermissionRow(
-            title = "بهینه‌سازی باتری",
-            desc = "برای پخش مطمئن اذان، بهینه‌سازی باتری را برای اپ غیرفعال کنید",
-            granted = batteryOk
-        ) { requestBattery(context) }
+            Spacer(modifier = Modifier.height(12.dp))
 
-        PermissionRow(
-            title = "اعلان‌ها",
-            desc = "مجوز نمایش اعلان برای نوار تاریخ و هشدار اذان",
-            granted = notifOk
-        ) { openNotifications(context) }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    PermissionRow(
+                        title = "اعلان‌ها",
+                        desc = "مجوز نمایش اعلان برای نوار تاریخ و هشدار اذان",
+                        granted = notifOk
+                    ) { openNotifications(context) }
+                }
+            }
 
-        PermissionRow(
-            title = "زمان‌بندی دقیق",
-            desc = "برای پخش اذان دقیقاً سر وقت",
-            granted = exactOk
-        ) { requestExact(context) }
+            Spacer(modifier = Modifier.height(12.dp))
 
-        PermissionRow(
-            title = "نمایش روی برنامه‌ها",
-            desc = "برای نمایش صفحه اذان روی سایر برنامه‌ها",
-            granted = overlayOk
-        ) { requestOverlay(context) }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    PermissionRow(
+                        title = "زمان‌بندی دقیق",
+                        desc = "برای پخش اذان دقیقاً سر وقت",
+                        granted = exactOk
+                    ) { requestExact(context) }
+                }
+            }
 
-        PermissionRow(
-            title = "آغاز خودکار",
-            desc = "در گوشی‌های شیائومی و برخی برندها، آغاز خودکار را فعال کنید",
-            granted = true
-        ) { openAutostart(context) }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    PermissionRow(
+                        title = "نمایش روی برنامه‌ها",
+                        desc = "برای نمایش صفحه اذان روی سایر برنامه‌ها",
+                        granted = overlayOk
+                    ) { requestOverlay(context) }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    PermissionRow(
+                        title = "آغاز خودکار",
+                        desc = "در گوشی‌های شیائومی و برخی برندها، آغاز خودکار را فعال کنید",
+                        granted = true
+                    ) { openAutostart(context) }
+                }
+            }
+        }
     }
 }
 
@@ -111,28 +184,23 @@ private fun PermissionRow(
     granted: Boolean,
     onClick: () -> Unit
 ) {
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Text(
-                    text = if (granted) "فعال" else "نیاز به اقدام",
-                    color = if (granted) Color(0xFF43A047) else Color(0xFFE53935),
-                    fontSize = 13.sp
-                )
-            }
-            Text(desc, fontSize = 12.sp, color = Color.Gray)
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = onClick) { Text("باز کردن تنظیمات") }
-            }
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = if (granted) "فعال" else "نیاز به اقدام",
+                color = if (granted) Color(0xFF43A047) else Color(0xFFE53935),
+                fontSize = 13.sp
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(desc, fontSize = 12.sp, color = Color.Gray)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            TextButton(onClick = onClick) { Text("باز کردن تنظیمات") }
         }
     }
 }
