@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -20,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ir.parvaz.calendar.R
+import ir.parvaz.calendar.core.city.Cities
 
 @Composable
 fun HomeScreen(
@@ -74,12 +79,47 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
+        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "اوقات شرعی ${state.cityName}",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    TextButton(onClick = { viewModel.openCityPicker() }) {
+                        Text("تغییر شهر")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                val times = state.prayerTimes
+                if (times == null) {
+                    Text(
+                        text = "برای نمایش اوقات شرعی، شهر را انتخاب کنید.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    PrayerRow("اذان صبح", times.fajr)
+                    PrayerRow("طلوع آفتاب", times.sunrise)
+                    PrayerRow("اذان ظهر", times.dhuhr)
+                    PrayerRow("غروب آفتاب", times.sunset)
+                    PrayerRow("اذان مغرب", times.maghrib)
+                    PrayerRow("اذان عشا", times.isha)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = stringResource(id = R.string.today_events_title),
                     style = MaterialTheme.typography.titleLarge,
@@ -95,5 +135,56 @@ fun HomeScreen(
                 )
             }
         }
+    }
+
+    if (state.showCityPicker) {
+        AlertDialog(
+            onDismissRequest = {
+                if (state.cityName.isNotEmpty()) viewModel.closeCityPicker()
+            },
+            title = { Text("انتخاب شهر") },
+            text = {
+                LazyColumn {
+                    items(Cities.all) { city ->
+                        TextButton(
+                            onClick = { viewModel.selectCity(city.id) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(city.name)
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                if (state.cityName.isNotEmpty()) {
+                    TextButton(onClick = { viewModel.closeCityPicker() }) {
+                        Text("بستن")
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun PrayerRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
