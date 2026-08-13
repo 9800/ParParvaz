@@ -1,5 +1,8 @@
 package ir.parvaz.calendar.ui
 
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
@@ -17,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.core.app.NotificationManagerCompat
 import ir.parvaz.calendar.adhan.AdhanScheduler
 import ir.parvaz.calendar.notification.DateNotificationHelper
 import ir.parvaz.calendar.ui.components.ParvazBottomNavBar
@@ -41,7 +45,23 @@ fun ParvazApp() {
             val scope = rememberCoroutineScope()
             var screen by remember { mutableStateOf(0) }
 
+            val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { granted ->
+                if (granted) {
+                    DateNotificationHelper.refresh(context)
+                }
+            }
+
             LaunchedEffect(Unit) {
+                if (Build.VERSION.SDK_INT >= 33 &&
+                    !NotificationManagerCompat.areNotificationsEnabled(context)
+                ) {
+                    notificationPermissionLauncher.launch(
+                        android.Manifest.permission.POST_NOTIFICATIONS
+                    )
+                }
+
                 DateNotificationHelper.refresh(context)
                 AdhanScheduler.scheduleAll(context)
             }
