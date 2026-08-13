@@ -9,7 +9,7 @@ class NotificationPrefs(context: Context) {
         context.getSharedPreferences("parvaz_notification", Context.MODE_PRIVATE)
 
     var enabled: Boolean
-        get() = prefs.getBoolean("enabled", false)
+        get() = prefs.getBoolean("enabled", true)
         set(value) = prefs.edit().putBoolean("enabled", value).apply()
 
     var bgColor: Int
