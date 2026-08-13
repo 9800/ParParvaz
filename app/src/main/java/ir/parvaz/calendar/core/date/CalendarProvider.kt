@@ -7,6 +7,8 @@ import java.time.temporal.ChronoField
 
 object CalendarProvider {
 
+    var hijriOffset: Int = 1
+
     fun today(now: LocalDate = LocalDate.now()): DateInfo {
         return DateInfo(
             persian = persianOf(now),
@@ -58,7 +60,7 @@ object CalendarProvider {
 
     fun hijriOf(date: LocalDate): HijriDate? {
         return try {
-            val hijrah = HijrahDate.from(date)
+            val hijrah = HijrahDate.from(date).plusDays(hijriOffset.toLong())
             HijriDate(
                 hijrah.get(ChronoField.YEAR),
                 hijrah.get(ChronoField.MONTH_OF_YEAR),
