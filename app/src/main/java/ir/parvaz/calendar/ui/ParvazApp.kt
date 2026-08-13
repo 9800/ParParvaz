@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import ir.parvaz.calendar.adhan.AdhanScheduler
+import ir.parvaz.calendar.core.icon.IconManager
 import ir.parvaz.calendar.notification.DateNotificationHelper
 import ir.parvaz.calendar.ui.components.ParvazBottomNavBar
 import ir.parvaz.calendar.ui.components.ParvazNavigationDrawer
@@ -62,6 +63,8 @@ fun ParvazApp() {
             }
 
             LaunchedEffect(Unit) {
+                IconManager.update(context)
+
                 if (Build.VERSION.SDK_INT >= 33 && !isNotificationEnabled(context)) {
                     notificationPermissionLauncher.launch(
                         android.Manifest.permission.POST_NOTIFICATIONS
