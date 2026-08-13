@@ -89,8 +89,7 @@ object DateNotificationHelper {
         )
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(IconCompat.createWithBitmap(dayBitmap(context, dayText, false, 0)))
-            .setLargeIcon(dayBitmap(context, dayText, true, prefs.boxColor))
+            .setSmallIcon(IconCompat.createWithBitmap(dayBitmap(context, dayText)))
             .setCustomContentView(views)
             .setCustomBigContentView(views)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
@@ -102,29 +101,14 @@ object DateNotificationHelper {
         manager.notify(NOTIFICATION_ID, notification)
     }
 
-    private fun dayBitmap(
-        context: Context,
-        text: String,
-        withBackground: Boolean,
-        bgColor: Int
-    ): Bitmap {
+    private fun dayBitmap(context: Context, text: String): Bitmap {
         val density = context.resources.displayMetrics.density
         val size = (128 * density).toInt()
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-        if (withBackground) {
-            paint.color = bgColor
-            canvas.drawRoundRect(
-                0f, 0f, size.toFloat(), size.toFloat(),
-                24f, 24f, paint
-            )
-            paint.color = AndroidColor.WHITE
-        } else {
-            paint.color = AndroidColor.WHITE
-        }
-
+        paint.color = AndroidColor.WHITE
         paint.textAlign = Paint.Align.CENTER
         paint.textSize = size * 0.5f
 
