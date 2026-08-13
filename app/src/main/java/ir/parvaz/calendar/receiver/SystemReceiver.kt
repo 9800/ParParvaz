@@ -3,6 +3,7 @@ package ir.parvaz.calendar.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import ir.parvaz.calendar.core.icon.IconManager
 import ir.parvaz.calendar.data.NotificationPrefs
 import ir.parvaz.calendar.notification.DateNotificationHelper
 
@@ -13,6 +14,8 @@ class SystemReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        IconManager.update(context)
+
         val prefs = NotificationPrefs(context)
         if (!prefs.enabled) return
 
