@@ -60,7 +60,7 @@ object CalendarProvider {
 
     fun hijriOf(date: LocalDate): HijriDate? {
         return try {
-            val hijrah = HijrahDate.from(date).plusDays(hijriOffset.toLong())
+            val hijrah = HijrahDate.from(date.plusDays(hijriOffset.toLong()))
             HijriDate(
                 hijrah.get(ChronoField.YEAR),
                 hijrah.get(ChronoField.MONTH_OF_YEAR),
