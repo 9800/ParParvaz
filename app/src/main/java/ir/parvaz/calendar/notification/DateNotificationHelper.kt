@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import ir.parvaz.calendar.MainActivity
 import ir.parvaz.calendar.R
@@ -55,23 +54,7 @@ object DateNotificationHelper {
 
         val prefs = NotificationPrefs(context)
         val today = CalendarProvider.today()
-
-        val views = RemoteViews(context.packageName, R.layout.notification_date)
-        views.setTextViewText(R.id.notif_weekday, today.weekday)
-        views.setTextViewText(R.id.notif_persian, DateFormatter.format(today.persian))
-        views.setTextViewText(
-            R.id.notif_others,
-            "${DateFormatter.format(today.gregorian)}  •  " +
-                (today.hijri?.let { DateFormatter.format(it) } ?: "")
-        )
-        views.setTextViewText(R.id.notif_day, fa(today.persian.day))
-
-        views.setInt(R.id.notif_root, "setBackgroundColor", prefs.bgColor)
-        views.setTextColor(R.id.notif_weekday, prefs.textColor)
-        views.setTextColor(R.id.notif_persian, prefs.textColor)
-        views.setTextColor(R.id.notif_others, prefs.textColor)
-        views.setInt(R.id.notif_day_box, "setBackgroundColor", prefs.boxColor)
-        views.setTextColor(R.id.notif_day, prefs.boxTextColor)
+        val hijri = today.hijri?.let { DateFormatter.format(it) } ?: ""
 
         val openIntent = Intent(context, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
@@ -81,13 +64,20 @@ object DateNotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val title = "${today.weekday} ${DateFormatter.format(today.persian)}"
+        val body = "${DateFormatter.format(today.gregorian)} • $hijri"
+
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setCustomContentView(views)
-            .setCustomBigContentView(views)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setContentTitle(title)
+            .setContentText(body)
+            .setSubText(fa(today.persian.day))
+            .setStyle(NotificationCompat.BigTextStyle().bigText("$title\n$body"))
+            .setColor(prefs.bgColor)
+            .setColorized(true)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setShowWhen(false)
             .setContentIntent(pendingIntent)
             .build()
 
