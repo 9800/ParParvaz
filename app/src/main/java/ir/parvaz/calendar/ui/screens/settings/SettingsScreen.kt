@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.parvaz.calendar.adhan.AdhanScheduler
@@ -108,7 +109,7 @@ fun SettingsScreen(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
             Box(modifier = Modifier.size(48.dp))
         }
@@ -183,7 +184,12 @@ fun SettingsScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("نوار اعلان تاریخ", color = BarBlue, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(
+                        "نوار اعلان تاریخ",
+                        color = BarBlue,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
 
                     SwitchRow("نوار اعلان دائمی تاریخ", enabled) {
@@ -195,32 +201,12 @@ fun SettingsScreen(
                         Text("مدل نمایش نوار اعلان", fontSize = 14.sp)
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        NotifStylePreview(
-                            style = 0,
-                            selected = notifStyle == 0,
-                            bg = bg,
-                            text = text,
-                            box = box,
-                            boxText = boxText
-                        ) {
-                            notifStyle = 0
-                            appearancePrefs.notifStyle = 0
-                            applyNotif()
+                        NotifStylePreview(0, notifStyle == 0, bg, text, box, boxText) {
+                            notifStyle = 0; appearancePrefs.notifStyle = 0; applyNotif()
                         }
-
                         Spacer(modifier = Modifier.height(8.dp))
-
-                        NotifStylePreview(
-                            style = 1,
-                            selected = notifStyle == 1,
-                            bg = bg,
-                            text = text,
-                            box = box,
-                            boxText = boxText
-                        ) {
-                            notifStyle = 1
-                            appearancePrefs.notifStyle = 1
-                            applyNotif()
+                        NotifStylePreview(1, notifStyle == 1, bg, text, box, boxText) {
+                            notifStyle = 1; appearancePrefs.notifStyle = 1; applyNotif()
                         }
 
                         ColorPicker("رنگ پس‌زمینه نوار", bg) {
@@ -249,8 +235,7 @@ fun SettingsScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("ظاهر", color = BarBlue, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(12.dp))
-
-                    Text("اندازه فونت: ${"٪${(fontSize * 100).toInt().let { faNum(it) }}"}", fontSize = 14.sp)
+                    Text("اندازه فونت: ٪${faNum((fontSize * 100).toInt())}", fontSize = 14.sp)
                     Slider(
                         value = fontSize,
                         onValueChange = {
@@ -271,9 +256,19 @@ fun SettingsScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("پایداری برنامه", color = BarBlue, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Spacer(modifier = Modifier.height(12.dp))
-
+                    Text(
+                        "پایداری برنامه",
+                        color = BarBlue,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "برای پخش مطمئن اذان و نمایش دائمی نوار تاریخ، دسترسی‌های باتری، اعلان و آغاز خودکار را فعال کنید.",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                     TextButton(onClick = onOpenPermissions) {
                         Text("مدیریت دسترسی‌ها")
                     }
@@ -354,9 +349,18 @@ private fun NotifStylePreview(
         ) {
             Column {
                 Text("سه‌شنبه", color = Color(text), fontSize = 11.sp)
-                Text("۲۰ مرداد ۱۴۰۵", color = Color(text), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "۲۰ مرداد ۱۴۰۵",
+                    color = Color(text),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
                 if (style == 1) {
-                    Text("۱۱ اوت ۲۰۲۶ • ۲۶ صفر ۱۴۴۸", color = Color(text), fontSize = 10.sp)
+                    Text(
+                        "۱۱ اوت ۲۰۲۶ • ۲۶ صفر ۱۴۴",
+                        color = Color(text),
+                        fontSize = 10.sp
+                    )
                 }
             }
             Box(
@@ -366,7 +370,12 @@ private fun NotifStylePreview(
                     .background(Color(box)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("۲۰", color = Color(boxText), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "۲۰",
+                    color = Color(boxText),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
