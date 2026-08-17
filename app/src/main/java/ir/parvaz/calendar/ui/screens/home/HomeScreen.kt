@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ir.parvaz.calendar.R
+import ir.parvaz.calendar.core.city.City
 import ir.parvaz.calendar.core.city.Cities
 
 private val HeaderBlue = Color(0xFF0E6BA8)
@@ -52,7 +53,7 @@ private val TodayCircle = Color(0xFFBBD6EE)
 private val White70 = Color(0xB3FFFFFF)
 
 private fun fa(n: Int): String {
-    return n.toString().map { c -> '۰' + (c - '۰') }.joinToString("")
+    return n.toString().map { c -> '۰' + (c - '0') }.joinToString("")
 }
 
 @Composable
@@ -104,11 +105,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
-                    Text(
-                        text = state.hijriDate,
-                        color = White70,
-                        fontSize = 13.sp
-                    )
+                    Text(text = state.hijriDate, color = White70, fontSize = 13.sp)
                 }
 
                 Box(
@@ -133,11 +130,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
-                    Text(
-                        text = state.gregorianDate,
-                        color = White70,
-                        fontSize = 13.sp
-                    )
+                    Text(text = state.gregorianDate, color = White70, fontSize = 13.sp)
                 }
             }
 
@@ -300,8 +293,10 @@ fun HomeScreen(
 
     if (state.showCityPicker) {
         var query by remember { mutableStateOf("") }
-        val filtered = if (query.isBlank()) {
-            Cities.all
+        var province by remember { mutableStateOf<String?>(null) }
+
+        val searchResults = if (query.isBlank()) {
+            null
         } else {
             Cities.all.filter { it.name.contains(query) }
         }
@@ -316,19 +311,37 @@ fun HomeScreen(
                     OutlinedTextField(
                         value = query,
                         onValueChange = { query = it },
-                        label = { Text("جستجو") },
+                        label = { Text("جستجوی شهر") },
                         modifier = Modifier.fillMaxWidth()
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     LazyColumn {
-                        items(filtered) { city ->
-                            TextButton(
-                                onClick = { viewModel.selectCity(city.id) },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(city.name)
+                        if (searchResults != null) {
+                            items(searchResults) { city ->
+                                CityRow(city) { viewModel.selectCity(city.id) }
+                            }
+                        } else if (province == null) {
+                            items(Cities.provinces) { p ->
+                                TextButton(
+                                    onClick = { province = p },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(p, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        } else {
+                            item {
+                                TextButton(
+                                    onClick = { province = null },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("بازگشت به استان‌ها")
+                                }
+                            }
+                            items(Cities.byProvince(province!!)) { city ->
+                                CityRow(city) { viewModel.selectCity(city.id) }
                             }
                         }
                     }
@@ -343,6 +356,13 @@ fun HomeScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun CityRow(city: City, onClick: () -> Unit) {
+    TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Text(city.name)
     }
 }
 
