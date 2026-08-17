@@ -11,6 +11,7 @@ import android.graphics.Canvas
 import android.graphics.Color as AndroidColor
 import android.graphics.Paint
 import android.graphics.Rect
+import android.graphics.Typeface
 import android.os.Build
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
@@ -103,14 +104,15 @@ object DateNotificationHelper {
 
     private fun dayBitmap(context: Context, text: String): Bitmap {
         val density = context.resources.displayMetrics.density
-        val size = (128 * density).toInt()
+        val size = (192 * density).toInt()
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
         paint.color = AndroidColor.WHITE
+        paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         paint.textAlign = Paint.Align.CENTER
-        paint.textSize = size * 0.5f
+        paint.textSize = size * 0.8f
 
         val bounds = Rect()
         paint.getTextBounds(text, 0, text.length, bounds)
