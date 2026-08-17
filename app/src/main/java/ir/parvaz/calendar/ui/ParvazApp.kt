@@ -2,7 +2,11 @@ package ir.parvaz.calendar.ui
 
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
@@ -23,7 +27,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import ir.parvaz.calendar.adhan.AdhanScheduler
-import ir.parvaz.calendar.core.icon.IconManager
 import ir.parvaz.calendar.notification.DateNotificationHelper
 import ir.parvaz.calendar.ui.components.ParvazBottomNavBar
 import ir.parvaz.calendar.ui.components.ParvazNavigationDrawer
@@ -63,12 +66,28 @@ fun ParvazApp() {
             }
 
             LaunchedEffect(Unit) {
-                IconManager.update(context)
-
                 if (Build.VERSION.SDK_INT >= 33 && !isNotificationEnabled(context)) {
                     notificationPermissionLauncher.launch(
                         android.Manifest.permission.POST_NOTIFICATIONS
                     )
+                }
+
+                try {
+                    val flags = context.getSharedPreferences("parvaz_flags", Context.MODE_PRIVATE)
+                    val asked = flags.getBoolean("battery_asked", false)
+                    if (!asked && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+                        if (!pm.isIgnoringBatteryOptimizations(context.packageName)) {
+                            flags.edit().putBoolean("battery_asked", true).apply()
+                            context.startActivity(
+                                Intent(
+                                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                                    Uri.parse("package:${context.packageName}")
+                                )
+                            )
+                        }
+                    }
+                } catch (exception: Exception) {
                 }
 
                 DateNotificationHelper.refresh(context)
